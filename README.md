@@ -17,3 +17,4 @@ In this setup I'm testing the folling bundlers:
 * partially closure-compiler
 
 TODO: Summarize results
+TODO: Refactor code
