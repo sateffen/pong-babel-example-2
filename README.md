@@ -16,5 +16,7 @@ In this setup I'm testing the folling bundlers:
 * rollup
 * partially closure-compiler
 
-TODO: Summarize results
-TODO: Refactor code
+TODOs:
+* Summarize results
+* Refactor code
+* Document code
