@@ -13,10 +13,10 @@ export default class Renderer {
         this.player1 = new Player(10, 270, 10, 60);
         this.player2 = new Player(780, 270, 10, 60);
         this.ball = new Ball(400, 300, 5);
-        
+
         const player1KeyBoardInput = new KeyboardInput(this.player1);
         const player2AI = new AI(this.player2, this.ball);
-        
+
         player1KeyBoardInput.apply();
         player2AI.apply();
         this.loop = this.loop.bind(this);
@@ -40,88 +40,73 @@ export default class Renderer {
     }
 
     recalculateBall(aTimeSinceLastFrame) {
-        const ball = this.ball;
-        const player1 = this.player1;
-        const player2 = this.player2;
-        const playField = this.playField;
-
-        let currentBallPosition = [ball.x, ball.y];
-        let ballPositionTransformation = ball.direction.map((aDirection) => {
-            return aDirection * ball.speed * aTimeSinceLastFrame;
+        let tmp = 0;
+        let currentBallPosition = [this.ball.x, this.ball.y];
+        let ballPositionTransformation = this.ball.direction.map((aDirection) => {
+            return aDirection * this.ball.speed * aTimeSinceLastFrame;
         });
         const nextEstimatedBallPosition = [
             currentBallPosition[0] + ballPositionTransformation[0],
             currentBallPosition[1] + ballPositionTransformation[1]
         ];
-        const ballHitsPlayer = nextEstimatedBallPosition[0] < player1.x + player1.width ||
-            nextEstimatedBallPosition[0] > player2.x;
-        const ballHitsBorders = nextEstimatedBallPosition[1] < ball.radius ||
-            nextEstimatedBallPosition[1] > playField.height - ball.radius;
+        const ballHitsPlayer = nextEstimatedBallPosition[0] < this.player1.x + this.player1.width ||
+            nextEstimatedBallPosition[0] > this.player2.x;
+        const ballHitsBorders = nextEstimatedBallPosition[1] < this.ball.radius ||
+            nextEstimatedBallPosition[1] > this.playField.height - this.ball.radius;
 
-        ball.speed = ball.speed + 0.000025 * aTimeSinceLastFrame;
+        this.ball.speed = this.ball.speed + 0.000025 * aTimeSinceLastFrame;
 
         if (ballHitsPlayer) {
-            let tmp = 0;
-
-            if (nextEstimatedBallPosition[0] < player1.x + player1.width) {
-                tmp = currentBallPosition[0] * ball.speed / (player1.x + player1.width);
-
-                if (nextEstimatedBallPosition[1] < player1.y - ball.radius ||
-                    nextEstimatedBallPosition[1] > player1.y + player1.height + ball.radius) {
-                    ball.speed = 0.3;
-                    ball.direction = [1, 0];
-                    currentBallPosition = [400, 300];
-                    tmp = 0;
-                }
-                else {
-                    ball.direction[1] = ball.direction[1] + player1.speed * player1.direction[1];
-                }
+            // if the ball hits the player 1            
+            if (nextEstimatedBallPosition[0] < this.player1.x + this.player1.width &&
+                nextEstimatedBallPosition[1] > this.player1.y - this.ball.radius &&
+                nextEstimatedBallPosition[1] > this.player1.y + this.player1.height + this.ball.radius
+            ) {
+                tmp = currentBallPosition[0] * this.ball.speed / (this.player1.x + this.player1.width);
+                this.ball.direction[1] = this.ball.direction[1] + this.player1.speed * this.player1.direction[1];
             }
+            // else if the ball hits the player 2
+            else if (nextEstimatedBallPosition[1] > this.player2.y - this.ball.radius &&
+                nextEstimatedBallPosition[1] < this.player2.y + this.player2.height + this.ball.radius
+            ) {
+                tmp = currentBallPosition[0] * this.ball.speed / this.player2.x;
+                this.ball.direction[1] = this.ball.direction[1] + this.player1.speed * this.player1.direction[1];
+            }
+            // else the ball scores a point
             else {
-                tmp = currentBallPosition[0] * ball.speed / player2.x;
-                
-                if (nextEstimatedBallPosition[1] < player2.y - ball.radius ||
-                    nextEstimatedBallPosition[1] > player2.y + player2.height + ball.radius) {
-                    ball.speed = 0.3;
-                    ball.direction = [-1, 0];
-                    currentBallPosition = [400, 300];
-                    tmp = 0;
-                }
-                else {
-                    ball.direction[1] = ball.direction[1] + player1.speed * player1.direction[1];
-                }
+                this.ball.speed = 0.3;
+                this.ball.direction = [1, 0];
+                currentBallPosition = [400, 300];
+                tmp = 0;
             }
 
-            ballPositionTransformation = ball.direction.map((aDirection) => {
-                return aDirection * ball.speed * tmp;
+            ballPositionTransformation = this.ball.direction.map((aDirection) => {
+                return aDirection * this.ball.speed * tmp;
             });
 
-            ball.direction[0] = -1 * ball.direction[0];
+            this.ball.direction[0] = -1 * this.ball.direction[0];
         }
 
         if (ballHitsBorders) {
-            let tmp = 0;
-
             if (nextEstimatedBallPosition[1] < 0) {
-                tmp = currentBallPosition[1] * ball.speed / ball.radius;
+                tmp = currentBallPosition[1] * this.ball.speed / this.ball.radius;
             }
             else {
-                tmp = currentBallPosition[1] * ball.speed / (playField.height - ball.radius);
+                tmp = currentBallPosition[1] * this.ball.speed / (this.playField.height - this.ball.radius);
             }
 
-            ballPositionTransformation = ball.direction.map((aDirection) => {
-                return aDirection * ball.speed * tmp;
+            ballPositionTransformation = this.ball.direction.map((aDirection) => {
+                return aDirection * this.ball.speed * tmp;
             });
 
-            ball.direction[1] = -1 * ball.direction[1];
+            this.ball.direction[1] = -1 * this.ball.direction[1];
         }
 
-        ball.x = currentBallPosition[0] + ballPositionTransformation[0];
-        ball.y = currentBallPosition[1] + ballPositionTransformation[1];
+        this.ball.x = currentBallPosition[0] + ballPositionTransformation[0];
+        this.ball.y = currentBallPosition[1] + ballPositionTransformation[1];
     }
-    
+
     recalculatePlayer(aTimeSinceLastFrame, aPlayer) {
-        const playField = this.playField;
         const currentPosition = [aPlayer.x, aPlayer.y];
         const playerTransformation = aPlayer.direction.map((aDirection) => {
             return aDirection * aPlayer.speed * aTimeSinceLastFrame;
@@ -130,14 +115,14 @@ export default class Renderer {
             currentPosition[0] + playerTransformation[0],
             currentPosition[1] + playerTransformation[1]
         ];
-        
+
         if (nextPosition[1] < 0) {
             nextPosition[1] = 0;
         }
-        else if (nextPosition[1] + aPlayer.height > playField.height) {
-            nextPosition[1] = playField.height - aPlayer.height;
+        else if (nextPosition[1] + aPlayer.height > this.playField.height) {
+            nextPosition[1] = this.playField.height - aPlayer.height;
         }
-        
+
         aPlayer.x = nextPosition[0];
         aPlayer.y = nextPosition[1];
     }
@@ -148,7 +133,7 @@ export default class Renderer {
         }
 
         const timeSinceLastFrame = (new Date()).valueOf() - this._lastRenderTime;
-        
+
         this.recalculatePlayer(timeSinceLastFrame, this.player1);
         this.recalculatePlayer(timeSinceLastFrame, this.player2);
         this.recalculateBall(timeSinceLastFrame);
