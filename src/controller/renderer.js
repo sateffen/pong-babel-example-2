@@ -57,20 +57,21 @@ export default class Renderer {
         this.ball.speed = this.ball.speed + 0.000025 * aTimeSinceLastFrame;
 
         if (ballHitsPlayer) {
-            // if the ball hits the player 1            
+            // if the ball hits the player 1
             if (nextEstimatedBallPosition[0] < this.player1.x + this.player1.width &&
                 nextEstimatedBallPosition[1] > this.player1.y - this.ball.radius &&
-                nextEstimatedBallPosition[1] > this.player1.y + this.player1.height + this.ball.radius
+                nextEstimatedBallPosition[1] < this.player1.y + this.player1.height + this.ball.radius
             ) {
                 tmp = currentBallPosition[0] * this.ball.speed / (this.player1.x + this.player1.width);
                 this.ball.direction[1] = this.ball.direction[1] + this.player1.speed * this.player1.direction[1];
             }
             // else if the ball hits the player 2
-            else if (nextEstimatedBallPosition[1] > this.player2.y - this.ball.radius &&
+            else if (nextEstimatedBallPosition[0] > this.player2.x &&
+                nextEstimatedBallPosition[1] > this.player2.y - this.ball.radius &&
                 nextEstimatedBallPosition[1] < this.player2.y + this.player2.height + this.ball.radius
             ) {
                 tmp = currentBallPosition[0] * this.ball.speed / this.player2.x;
-                this.ball.direction[1] = this.ball.direction[1] + this.player1.speed * this.player1.direction[1];
+                this.ball.direction[1] = this.ball.direction[1] + this.player2.speed * this.player2.direction[1];
             }
             // else the ball scores a point
             else {
